@@ -1,0 +1,25 @@
+
+# 编译目录
+GateServer/GateServer/
+GateServer/x64/
+GateServer/.vs/
+
+# Node.js 依赖
+VerifyServer/node_modules/
+
+# Node.js 日志
+VerifyServer/npm-debug.log*
+VerifyServer/yarn-debug.log*
+VerifyServer/yarn-error.log*
+
+# 环境变量文件
+VerifyServer/.env
+VerifyServer/.env.local
+
+# =================================
+# zhaoy7chat (Qt) 忽略规则
+# =================================
+
+# Qt 构建目录
+zhaoy7chat/build/
+zhaoy7chat/.qtcreator/

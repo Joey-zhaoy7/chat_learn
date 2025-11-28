@@ -1,0 +1,18 @@
+{
+    "email": {
+      "user": "joey_zhaoy7@163.com",
+      "pass": "EMcMWrLcNszyPqVM"
+    },
+
+    "mysql": {
+      "host": "localhost",
+      "port": 3306,
+      "passwd":123456
+    },
+
+    "redis": {
+      "host": "81.68.86.146",
+      "port": 6380,
+      "passwd":123456
+    }
+}
