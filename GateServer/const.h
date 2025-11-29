@@ -11,11 +11,14 @@
 #include "Singleton.h"
 #include <functional>
 #include <map>
+#include <queue>
 #include <unordered_map>
 #include <json/json.h>
 #include <json/value.h>
 #include <json/reader.h>
-
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 namespace beast = boost::beast;
 namespace http = beast::http;
@@ -28,5 +31,5 @@ enum ErrorCode {
     RPCFailed = 1002,
 };
 
-class ConfigMgr;
-extern ConfigMgr gCfgMgr; 
+//class ConfigMgr;
+//extern ConfigMgr gCfgMgr; 

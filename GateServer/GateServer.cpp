@@ -7,7 +7,8 @@
 
 // http://localhost:8080/get_test
 int main() {
-    ConfigMgr gCfgMgr;
+    //ConfigMgr gCfgMgr;
+    ConfigMgr& gCfgMgr = ConfigMgr::Inst();
     std::string gate_port_str = gCfgMgr["GateServer"]["port"];
     unsigned short gate_port = atoi(gate_port_str.c_str());
 

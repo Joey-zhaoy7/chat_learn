@@ -12,36 +12,34 @@ using message::GetVerifyReq;
 using message::GetVerifyRsp;
 using message::VerifyService;
 
+//pool
+class RPConPool {
+public:
+	RPConPool(size_t poolsize, std::string host, std::string port);
+	~RPConPool();
+	void Close();
+	std::unique_ptr<VerifyService::Stub> getConnection();
+	void returnConnection(std::unique_ptr<VerifyService::Stub> context);
+private:
+	std::atomic<bool> b_stop_;
+	size_t poolSize_;
+	std::string host_;
+	std::string port_;
+	std::queue<std::unique_ptr<VerifyService::Stub>> connections_;
+	std::condition_variable cond_;
+	std::mutex mutex_;
 
+};
 
 class VerifyGrpcClient : public Singleton<VerifyGrpcClient>
 {
 	friend class Singleton<VerifyGrpcClient>;
 public:
 	//¸øGateServerÓÃµÄ
-	GetVerifyRsp GetVerifyCode(std::string email) {
-		ClientContext client_context;
-		GetVerifyRsp reply;
-		GetVerifyReq  request;
-		request.set_email(email);
-
-		Status status = stub_->GetVerifyCode(&client_context, request, &reply);
-		if (status.ok()) {
-			return reply;
-		}
-		else
-		{
-			reply.set_error(ErrorCode::RPCFailed);
-			return reply;
-		}
-	}
+	GetVerifyRsp GetVerifyCode(std::string email);
 private:
-	VerifyGrpcClient() {
-		//std::shared_ptr<Channel> channel = grpc::CreateChannel("0.0.0.0:50051",
-		std::shared_ptr<Channel> channel = grpc::CreateChannel("127.0.0.1:50051",
-			grpc::InsecureChannelCredentials());
-		stub_ = VerifyService::NewStub(channel);
-	}
-	std::unique_ptr<VerifyService::Stub> stub_;
+	VerifyGrpcClient();
+	//std::unique_ptr<VerifyService::Stub> stub_;
+	std::unique_ptr<RPConPool> pool_;
 };
 
