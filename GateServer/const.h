@@ -31,7 +31,16 @@ enum ErrorCode {
     Success = 0,
     Error_Json = 1001,
     RPCFailed = 1002,
+    VerifyCodeExpired = 1003,
+    VerifyCodeError = 1004,
+    UserExist = 1005,
+    PasswdError = 1006,
+    EmailNotMatch = 1007,
+    PasswdUpFailed = 1008,
+    PasswdInvalid = 1009,
 };
+
+#define CODEPREFIX "code_"
 
 //class ConfigMgr;
 //extern ConfigMgr gCfgMgr; 

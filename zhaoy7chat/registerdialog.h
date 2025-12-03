@@ -17,8 +17,15 @@ public:
     ~RegisterDialog();
 
 private slots:
+    //点击获取验证码槽函数
     void on_get_code_btn_clicked();
+
+    //http请求结束槽函数
     void slot_reg_mod_finish(ReqId id, QString res, ErrorCodes err);
+
+    //注册界面的确认按钮槽函数
+    void on_sure_btn_clicked();
+
 private:
     void initHttpHandlers();
     QMap<ReqId, std::function<void(const QJsonObject&)>> _handlers;

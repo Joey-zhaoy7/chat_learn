@@ -30,6 +30,7 @@ void HttpMgr::PostHttpReq(QUrl url, QJsonObject json, ReqId req_id, Modules mod)
             return;
         }
         QString res = reply->readAll();
+        //无论成功还是失败，都会发这个信号
         emit self->sig_http_finish(req_id, res, ErrorCodes::SUCCESS, mod);
         reply->deleteLater();
         return;

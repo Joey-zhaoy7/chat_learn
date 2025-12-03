@@ -125,7 +125,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="emai_edit">
+            <widget class="QLineEdit" name="email_edit">
              <property name="minimumSize">
               <size>
                <width>0</width>
@@ -276,7 +276,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
-            <widget class="QPushButton" name="confirm_btn">
+            <widget class="QPushButton" name="sure_btn">
              <property name="minimumSize">
               <size>
                <width>0</width>
