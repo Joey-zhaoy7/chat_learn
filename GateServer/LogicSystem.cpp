@@ -2,6 +2,7 @@
 #include "HttpConnection.h"
 #include "VerifyGrpcClient.h"
 #include  "RedisMgr.h"
+#include "MysqlMgr.h"
 
 LogicSystem::LogicSystem()
 {
@@ -53,20 +54,20 @@ LogicSystem::LogicSystem()
             beast::ostream(connection->_response.body()) << jsonstr;
             return true;
         }
-
-        //访问redis查找
-        /*bool b_usr_exist = RedisMgr::GetInstance()->ExistsKey(src_root["user"].asString());
-        if (b_usr_exist) {
-            std::cout << " user exist" << std::endl;
-            root["error"] = ErrorCode::UserExist;
-            std::string jsonstr = root.toStyledString();
-            beast::ostream(connection->_response.body()) << jsonstr;
+        
+		int uid = MysqlMgr::GetInstance()->RegUser(name, email, pwd);
+        if (uid == 0 || uid == -1) {
+			std::cout << "register user failed, user exist or sql error" << std::endl;
+			root["error"] = ErrorCode::UserExist;
+			std::string jsonstr = root.toStyledString();
+			beast::ostream(connection->_response.body()) << jsonstr;
             return true;
-        }*/
+        }
 
         //查找数据库判断用户是否存在
         root["error"] = 0;
         root["email"] = email;
+		root["uid"] = uid;
         root["user"] = name;
         root["passwd"] = pwd;
         root["confirm"] = confirm;
@@ -75,6 +76,9 @@ LogicSystem::LogicSystem()
         std::string jsonstr = root.toStyledString();
         beast::ostream(connection->_response.body()) << jsonstr;
         return true;
+
+
+
 
         });
         

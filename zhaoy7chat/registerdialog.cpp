@@ -29,8 +29,8 @@ RegisterDialog::~RegisterDialog()
 void RegisterDialog::on_get_code_btn_clicked()
 {
     //验证邮箱的地址正则表达式
-    // auto email = ui->email_edit->text();
-    auto email = "2631621675@qq.com";
+    auto email = ui->email_edit->text();
+    // auto email = "2631621675@qq.com";
     // 邮箱地址的正则表达式
     QRegularExpression regex(R"((\w+)(\.|_)?(\w*)@(\w+)(\.(\w+))+)");
     bool match = regex.match(email).hasMatch(); // 执行正则表达式匹配
@@ -72,7 +72,9 @@ void RegisterDialog::initHttpHandlers()
 {
     _handlers.insert(ReqId::ID_GET_VERIFY_CODE, [this](const QJsonObject& jsonObject){
         //确保接收服务器返回的json中 含error  email两个key
+
         int error = jsonObject["error"].toInt();
+        qDebug() << "get verify code error is" <<error;
         if(error != ErrorCodes::SUCCESS){
             showTip(tr("parameters error"), false);
             return;
@@ -89,6 +91,7 @@ void RegisterDialog::initHttpHandlers()
         }
         auto email = jsonObject["email"].toString();
         showTip(tr("registe success"),true);
+        qDebug()<<"user uid is "<<jsonObject["uid"].toString();
         qDebug() << "email is" <<email;
     });
 }
@@ -140,15 +143,15 @@ void RegisterDialog::on_sure_btn_clicked()
 
     //send http request
     QJsonObject json_obj;
-    // json_obj["user"] = ui->user_edit->text();
-    // json_obj["email"] = ui->email_edit->text();
-    // json_obj["passwd"] = ui->pass_edit->text();
-    // json_obj["confirm"] = ui->confirm_edit->text();
+    json_obj["user"] = ui->user_edit->text();
+    json_obj["email"] = ui->email_edit->text();
+    json_obj["passwd"] = ui->pass_edit->text();
+    json_obj["confirm"] = ui->confirm_edit->text();
 
-    json_obj["user"] = "user";
-    json_obj["email"] = "2631621675@qq.com";
-    json_obj["passwd"] = "password";
-    json_obj["confirm"] = "password";
+    // json_obj["user"] = "user";
+    // json_obj["email"] = "2631621675@qq.com";
+    // json_obj["passwd"] = "password";
+    // json_obj["confirm"] = "password";
 
     json_obj["verifycode"] = ui->verifycode_edit->text();
     //void PostHttpReq(QUrl  url, QJsonObject json, ReqId req_id, Modules mod);

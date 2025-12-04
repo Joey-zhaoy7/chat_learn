@@ -4,6 +4,8 @@ GateServer/GateServer/
 GateServer/x64/
 GateServer/.vs/
 
+GateServer/*.dll
+
 # Node.js “¿¿µ
 VerifyServer/node_modules/
 
