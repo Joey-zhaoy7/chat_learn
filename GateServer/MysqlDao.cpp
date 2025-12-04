@@ -36,10 +36,10 @@ int MysqlDao::RegUser(const std::string& name, const std::string& email, const s
 		//Gemini【修正】消费掉存储过程调用可能产生的任何结果集
         // 确保连接在执行下一个查询前是干净的
 		
-		while (stmt->getMoreResults()) {
-			// getResultSet() 即使是空结果集，也会将其从连接上取走
-			std::unique_ptr<sql::ResultSet> rs(stmt->getResultSet());
-		}
+		//while (stmt->getMoreResults()) {
+		//	// getResultSet() 即使是空结果集，也会将其从连接上取走
+		//	std::unique_ptr<sql::ResultSet> rs(stmt->getResultSet());
+		//}
 
 		std::unique_ptr<sql::Statement> stmtResult(con->con_->createStatement());
 		std::unique_ptr<sql::ResultSet> res(stmtResult->executeQuery("SELECT @result AS result"));
@@ -96,7 +96,7 @@ MysqlPool::MysqlPool(const std::string& url, const std::string& user, const std:
 		check_thread_ = std::thread([this]() {
 			while (!b_stop_) {
 				checkConnection();
-				std::this_thread::sleep_for(std::chrono::seconds(60));
+				std::this_thread::sleep_for(std::chrono::seconds(180));
 			}
 			});
 		check_thread_.detach();
@@ -160,23 +160,51 @@ void MysqlPool::checkConnection()
 		Defer defer([this, &con]() {
 			queue_pool_.push(std::move(con));
 			});
-		if (timestamp - con->last_operate_time_ < 5) {
+		if (timestamp - con->last_operate_time_ < 10) {
 			continue;
 		}
 		try {
+
+			// 使用 executeQuery 并显式消费结果集，确保连接没有残留 resultset
 			std::unique_ptr<sql::Statement> stmt(con->con_->createStatement());
+			std::unique_ptr<sql::ResultSet> rs(stmt->executeQuery("SELECT 1"));
+			// 消费结果集，防止残留
+			if (rs && rs->next()) {
+				// no-op
+			}
+			con->last_operate_time_ = timestamp;
+			std::cout << "execue timer alive query, cur is " << timestamp << ", conn=" << con->con_.get() << std::endl;
+
+			/*std::unique_ptr<sql::Statement> stmt(con->con_->createStatement());
 			stmt->execute("SELECT 1");
 			con->last_operate_time_ = timestamp;
-			std::cout << "execue timer alive query,cur is"<<timestamp << std::endl;
+			std::cout << "execue timer alive query,cur is"<<timestamp << std::endl;*/
 		}
 		catch (sql::SQLException& e) {
-			std::cout << "Error keeping connection alive: " << e.what() << std::endl;
+			std::cout << "Error keeping connection alive (conn=" << con->con_.get() << "): " << e.what() << std::endl;
+
+			// 出现问题：重建底层连接以恢复干净状态
+			try {
+				sql::mysql::MySQL_Driver* driver = sql::mysql::get_mysql_driver_instance();
+				auto* newconn = driver->connect(url_, user_, passwd_);
+				newconn->setSchema(schema_);
+				con->con_.reset(newconn);
+				con->last_operate_time_ = timestamp;
+				std::cout << "Recreated connection for conn slot, new conn=" << con->con_.get() << std::endl;
+			}
+			catch (sql::SQLException& e2) {
+				std::cout << "Failed to recreate connection: " << e2.what() << std::endl;
+			}
+
+
+
+			/*std::cout << "Error keeping connection alive: " << e.what() << std::endl;
 
 			sql::mysql::MySQL_Driver* driver = sql::mysql::get_mysql_driver_instance();
 			auto* newconn = driver->connect(url_, user_, passwd_);
 			newconn->setSchema(schema_);
 			con->con_.reset(newconn);
-			con->last_operate_time_ = timestamp;
+			con->last_operate_time_ = timestamp;*/
 		}
 	}
 }

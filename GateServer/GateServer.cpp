@@ -5,6 +5,7 @@
 #include "CServer.h"
 #include "ConfigMgr.h"
 #include "RedisMgr.h"
+#include "MysqlDao.h"
 
 void TestRedisMgr() {
     /*assert(RedisMgr::GetInstance()->Connect("81.68.86.146", 6380));
@@ -125,16 +126,21 @@ void TestRedis() {
 
 }
 
+void TestMysql() {
+    MysqlDao* mysqlDao_ = new MysqlDao();
+
+}
 // http://localhost:8080/get_test
 int main() {
 
+    
     //TestRedis();
     //TestRedisMgr();
     //ConfigMgr gCfgMgr;
     ConfigMgr& gCfgMgr = ConfigMgr::Inst();
     std::string gate_port_str = gCfgMgr["GateServer"]["port"];
     unsigned short gate_port = atoi(gate_port_str.c_str());
-
+    //TestMysql();
     try
     {
         unsigned short port = static_cast<unsigned short>(8080);
