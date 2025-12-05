@@ -16,6 +16,60 @@ MysqlDao::~MysqlDao()
 	pool_->Close();
 }
 
+bool MysqlDao::UpdatePwd(const std::string& name, const std::string& new_pwd)
+{
+	auto con = pool_->getConnection();
+	try {
+		if (con == nullptr) return false;
+
+		//SQL语句更新用户密码
+		std::unique_ptr<sql::PreparedStatement> pstmt(con->con_->prepareStatement("UPDATE user SET pwd = ? WHERE name = ?"));
+		pstmt->setString(1, new_pwd);
+		pstmt->setString(2, name);
+		int affected_rows = pstmt->executeUpdate();
+		std::cout << "UpdatePwd affected rows: " << affected_rows << std::endl;
+		pool_->returnConnection(std::move(con));
+		return affected_rows > 0;
+	}
+	catch (sql::SQLException& e) {
+		pool_->returnConnection(std::move(con));
+		std::cerr << "SQLException: " << e.what();
+		std::cerr << " (MySQL error code: " << e.getErrorCode();
+		std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		return false;
+	}
+}
+
+bool MysqlDao::CheckEmail(const std::string& name, const std::string& email)
+{
+	auto con = pool_->getConnection();
+	try {
+		if (con == nullptr) return false;
+
+		//SQL语句查询用户名对应的邮箱
+		std::unique_ptr<sql::PreparedStatement> pstmt(con->con_->prepareStatement("SELECT email FROM user WHERE name =?"));
+		pstmt->setString(1, name);
+		std::unique_ptr<sql::ResultSet> res(pstmt->executeQuery());
+		while (res->next()) {
+			std::cout << "Email from DB: " << res->getString("email") << std::endl;
+			if (email != res->getString("email")){
+				pool_->returnConnection(std::move(con));
+				return false;
+			}
+			pool_->returnConnection(std::move(con));
+			return true;
+		}
+		return true;
+	}catch (sql::SQLException& e) {
+		pool_->returnConnection(std::move(con));
+		std::cerr << "SQLException: " << e.what();
+		std::cerr << " (MySQL error code: " << e.getErrorCode();
+		std::cerr << ", SQLState: " << e.getSQLState() << " )" << std::endl;
+		return false;
+	}
+	return true;
+}
+
 int MysqlDao::RegUser(const std::string& name, const std::string& email, const std::string& pwd)
 {
 	//auto* con = pool_->getConnection();//return unique_ptr, auto*->auto

@@ -29,6 +29,8 @@ private slots:
     //注册成功界面
     void on_return_btn_clicked();
 
+    void on_cancel_btn_clicked();
+
 private:
     void initHttpHandlers();
     QMap<ReqId, std::function<void(const QJsonObject&)>> _handlers;

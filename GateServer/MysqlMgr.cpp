@@ -10,3 +10,13 @@ int MysqlMgr::RegUser(const std::string& name, const std::string& email, const s
 {
 	return mysqlDao_.RegUser(name, email, pwd);
 }
+
+bool MysqlMgr::CheckEmail(const std::string& name, const std::string& email)
+{
+	return mysqlDao_.CheckEmail(name, email);
+}
+
+bool MysqlMgr::UpdatePwd(const std::string& name, const std::string& new_pwd)
+{
+	return mysqlDao_.UpdatePwd(name, new_pwd);
+}

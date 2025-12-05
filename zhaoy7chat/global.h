@@ -21,10 +21,15 @@ extern std::function<QString(QString)> xorString;
 enum ReqId{
     ID_GET_VERIFY_CODE = 1001,//获取验证码
     ID_REG_USER = 1002, //注册用户
+    ID_RESET_PWD = 1003,//修改密码
+    ID_LOGIN_USER = 1004,
+    ID_CHAT_LOGIN =1005,
+    ID_CHAT_LOGIN_RSP = 1006,//登录聊天界面回包
 };
 
 enum Modules{
     REGISTERMOD = 0,
+    RESETMOD = 1,
 };
 
 enum ErrorCodes{

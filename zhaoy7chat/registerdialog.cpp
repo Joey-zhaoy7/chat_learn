@@ -292,35 +292,35 @@ bool RegisterDialog::checkVerifyValid()
 
 void RegisterDialog::on_sure_btn_clicked()
 {
-    // if(ui->user_edit->text() == ""){
-    //     showTip(tr("用户名不能为空"), false);
-    //     return;
-    // }
+    if(ui->user_edit->text() == ""){
+        showTip(tr("用户名不能为空"), false);
+        return;
+    }
 
-    // if(ui->email_edit->text() == ""){
-    //     showTip(tr("邮箱不能为空"), false);
-    //     return;
-    // }
+    if(ui->email_edit->text() == ""){
+        showTip(tr("邮箱不能为空"), false);
+        return;
+    }
 
-    // if(ui->pass_edit->text() == ""){
-    //     showTip(tr("密码不能为空"), false);
-    //     return;
-    // }
+    if(ui->pass_edit->text() == ""){
+        showTip(tr("密码不能为空"), false);
+        return;
+    }
 
-    // if(ui->confirm_edit->text() == ""){
-    //     showTip(tr("确认密码不能为空"), false);
-    //     return;
-    // }
+    if(ui->confirm_edit->text() == ""){
+        showTip(tr("确认密码不能为空"), false);
+        return;
+    }
 
-    // if(ui->confirm_edit->text() != ui->pass_edit->text()){
-    //     showTip(tr("密码和确认密码不匹配"), false);
-    //     return;
-    // }
+    if(ui->confirm_edit->text() != ui->pass_edit->text()){
+        showTip(tr("密码和确认密码不匹配"), false);
+        return;
+    }
 
-    // if(ui->verifycode_edit->text() == ""){
-    //     showTip(tr("验证码不能为空"), false);
-    //     return;
-    // }
+    if(ui->verifycode_edit->text() == ""){
+        showTip(tr("验证码不能为空"), false);
+        return;
+    }
 
     //send http request
     QJsonObject json_obj;
@@ -340,6 +340,13 @@ void RegisterDialog::on_sure_btn_clicked()
 }
 
 void RegisterDialog::on_return_btn_clicked()
+{
+    countdown_timer_->stop();
+    emit sigSwitchLogin();
+}
+
+
+void RegisterDialog::on_cancel_btn_clicked()
 {
     countdown_timer_->stop();
     emit sigSwitchLogin();

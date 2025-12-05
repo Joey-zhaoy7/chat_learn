@@ -129,6 +129,71 @@ LogicSystem::LogicSystem()
         return true;
         });
 
+    RegPost("/reset_pwd", [](std::shared_ptr<HttpConnection> connection) {
+        auto body_str = boost::beast::buffers_to_string(connection->_request.body().data());
+        std::cout << "reset_pwd receive body is   " << body_str << std::endl;
+        connection->_response.set(http::field::content_type, "text/json");
+        Json::Value root;
+        Json::Reader reader;
+        Json::Value src_root;
+        bool parse_success = reader.parse(body_str, src_root);
+        if (!parse_success) {
+            std::cout << "Failed to parse JSON data!" << std::endl;
+            root["error"] = ErrorCode::Error_Json;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+        auto email = src_root["email"].asString();
+        auto name = src_root["user"].asString();
+        auto pwd = src_root["passwd"].asString();
+        auto confirm = src_root["confirm"].asString();
+
+        //先查找redis验证码是否正确
+        std::string verify_code;
+        bool b_get_verify = RedisMgr::GetInstance()->Get(CODEPREFIX + src_root["email"].asString(), verify_code);
+        if (!b_get_verify) {
+            std::cout << "get verify code expired" << std::endl;
+            root["error"] = ErrorCode::VerifyCodeExpired;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+        if (verify_code != src_root["verifycode"].asString()) {
+            std::cout << "verify code error" << std::endl;
+            root["error"] = ErrorCode::VerifyCodeError;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+        //查询数据库判断用户和邮箱是否匹配
+        bool email_valid = MysqlMgr::GetInstance()->CheckEmail(name, email);
+        if (!email_valid) {
+            std::cout << "username and email not match" << std::endl;
+            root["error"] = ErrorCode::EmailNotMatch;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+        //更新数据库密码
+        bool b_up = MysqlMgr::GetInstance()->UpdatePwd(name, pwd);
+        if (!b_up) {
+            std::cout << "update password failed" << std::endl;
+            root["error"] = ErrorCode::PasswdUpFailed;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+        std::cout << "reset password success" << std::endl;
+        root["error"] = 0;
+        root["email"] = email;
+        root["user"] = name;
+        root["passwd"] = pwd;
+        root["verifycode"] = src_root["verifycode"].asString();
+        std::string jsonstr = root.toStyledString();
+        beast::ostream(connection->_response.body()) << jsonstr;
+        return true;
+        });
 }
 
 bool LogicSystem::HandleGet(std::string path, std::shared_ptr<HttpConnection> connection)
