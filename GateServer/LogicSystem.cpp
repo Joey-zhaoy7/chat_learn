@@ -3,6 +3,7 @@
 #include "VerifyGrpcClient.h"
 #include  "RedisMgr.h"
 #include "MysqlMgr.h"
+#include "StatusGrpcClient.h"
 
 LogicSystem::LogicSystem()
 {
@@ -81,7 +82,6 @@ LogicSystem::LogicSystem()
 
 
         });
-        
 
     RegGet("/get_test", [](std::shared_ptr<HttpConnection> connection) {
         beast::ostream(connection->_response.body()) << "receive get_test req";
@@ -194,6 +194,56 @@ LogicSystem::LogicSystem()
         beast::ostream(connection->_response.body()) << jsonstr;
         return true;
         });
+
+    RegPost("/user_login", [](std::shared_ptr<HttpConnection> connection) {
+		auto body_str = boost::beast::buffers_to_string(connection->_request.body().data());
+		std::cout << "user_login receive body is   " << body_str << std::endl;
+		connection->_response.set(http::field::content_type, "text/json");
+		Json::Value root;
+		Json::Reader reader;
+		Json::Value src_root;
+		bool parse_success = reader.parse(body_str, src_root);
+        if (!parse_success) {
+            std::cout << "Failed to parse JSON data!" << std::endl;
+            root["error"] = ErrorCode::Error_Json;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+        }
+
+		auto email = src_root["email"].asString();
+		auto pwd = src_root["passwd"].asString();
+		UserInfo userinfo;
+		//查询数据库判断密码和邮箱是否匹配
+		bool pwd_valid = MysqlMgr::GetInstance()->CheckPwd(email, pwd,userinfo);
+        if(pwd_valid == false) {
+            std::cout << "email and passwd not match" << std::endl;
+            root["error"] = ErrorCode::EmailNotMatch;
+            std::string jsonstr = root.toStyledString();
+            beast::ostream(connection->_response.body()) << jsonstr;
+            return true;
+		}
+        //查找StatusServer找到合适的连接
+        auto reply = StatusGrpcClient::GetInstance()->GetChatServer(userinfo.uid);
+        if (reply.error()) {
+			std::cout << "grpc get chatserver failed" << std::endl;
+			root["error"] = reply.error();
+			std::string jsonstr = root.toStyledString();
+			beast::ostream(connection->_response.body()) << jsonstr;
+			return true;
+        }
+
+		std::cout << "succeed to load userinfo uid is" << userinfo.uid << std::endl;
+		root["error"] = 0;
+		root["email"] = email;
+		root["uid"] = userinfo.uid;
+		root["token"] = reply.token();
+		root["host"] = reply.host(); 
+		std::string jsonstr = root.toStyledString();
+		beast::ostream(connection->_response.body()) << jsonstr;
+        return true;
+
+		});
 }
 
 bool LogicSystem::HandleGet(std::string path, std::shared_ptr<HttpConnection> connection)

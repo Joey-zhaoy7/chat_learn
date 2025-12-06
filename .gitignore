@@ -3,8 +3,13 @@
 GateServer/GateServer/
 GateServer/x64/
 GateServer/.vs/
-
 GateServer/*.dll
+
+# ±àÒëÄ¿Â¼2
+StatusServer/StatusServer/
+StatusServer/x64/
+StatusServer/.vs/
+StatusServer/*.dll
 
 # Node.js ÒÀÀµ
 VerifyServer/node_modules/

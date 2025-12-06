@@ -30,6 +30,7 @@ enum ReqId{
 enum Modules{
     REGISTERMOD = 0,
     RESETMOD = 1,
+    LOGINMODE = 2,
 };
 
 enum ErrorCodes{
@@ -54,5 +55,13 @@ enum ClickLbState{
 };
 
 extern QString gate_url_prefix;
+
+//tcp
+struct ServerInfo{
+    QString Host;
+    QString Port;
+    QString Token;
+    int Uid;
+};
 
 #endif // GLOBAL_H
