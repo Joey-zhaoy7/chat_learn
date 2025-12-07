@@ -3,7 +3,7 @@
 #include "httpmgr.h"
 #include <QPainter>
 #include <QPainterPath>
-
+#include "tcpmgr.h"
 LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::LoginDialog)
@@ -20,6 +20,11 @@ LoginDialog::LoginDialog(QWidget *parent)
 
     //连接登录回包信号
     connect(HttpMgr::GetInstance().get(), &HttpMgr::sig_login_mod_finish, this,&LoginDialog::slot_http_login_mod_finish);
+    //连接tcp连接请求的信号和槽函数
+    connect(this, &LoginDialog::sig_connect_tcp,TcpMgr::GetInstance().get(),&TcpMgr::slot_tcp_connect);
+    //连接客户端连接成功的信号
+    connect(TcpMgr::GetInstance().get(),&TcpMgr::sig_con_success,this,&LoginDialog::slot_tcp_con_finish);
+
 }
 
 LoginDialog::~LoginDialog()
@@ -147,10 +152,10 @@ void LoginDialog::initHttpHandlers()
         _token = si.Token;
         qDebug()<<"email is " << email <<"uid is" << _uid << "host is"
                  <<si.Host <<"port is" <<si.Port << "token is" << _token;
-        //发送信号给tcpMgr
+        //发送信号给tcpMgr 让tcpMgr连接chatServer
+        //如果连接成功，tcpMgr会给登录界面发送sig_con_success信号
+        //登录执行tcp_finish槽函数
         emit sig_connect_tcp(si);
-
-
 
     });
 }
@@ -200,5 +205,25 @@ void LoginDialog::slot_http_login_mod_finish(ReqId id, QString res, ErrorCodes e
     jsonDoc.object();//json对象传给回调函数 让回调函数进行处理
     _handlers[id](jsonDoc.object());
     return;
+}
+
+//TCPMGR发过来的，tcp连接呈成功的槽函数
+void LoginDialog::slot_tcp_con_finish(bool bsuccess)
+{
+    if(bsuccess){
+        showTip(tr("聊天服务登录成功，正在登录"),true);
+        QJsonObject jsonObj;
+        jsonObj["uid"] = _uid;
+        jsonObj["token"] = _token;
+
+        QJsonDocument doc(jsonObj);
+        QString jsonString = doc.toJson(QJsonDocument::Indented);
+
+        //通过tcpmgr发送数据 tcpmgr将json数据写入socket
+        TcpMgr::GetInstance()->sig_send_data(ReqId::ID_CHAT_LOGIN, jsonString);
+    }else{
+        showTip(tr("网络错误"),true);
+        enableBtn(true);
+    }
 }
 

@@ -38,10 +38,12 @@ public slots:
 signals:
     void switchRegister();
     void switchReset();
-    void sig_connect_tcp(ServerInfo);// 发送一个信号给tcpMgr，tcpMgr发送一个强连接
+    void sig_connect_tcp(ServerInfo& si);// 发送一个信号给tcpMgr，tcpMgr发送一个强连接
+
 private slots:
     void on_login_btn_clicked();
     void slot_http_login_mod_finish(ReqId id, QString res, ErrorCodes err);
+    void slot_tcp_con_finish(bool bsuccess);//接收到tcp连接完成的槽函数
 };
 
 #endif // LOGINDIALOG_H

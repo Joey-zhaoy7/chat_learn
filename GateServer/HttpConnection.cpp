@@ -19,6 +19,7 @@ tcp::socket& HttpConnection::GetSocket()
 
 void HttpConnection::Start()
 {
+	//为什么不直接用this 因为异步操作可能在当前函数返回后才完成
     auto self = shared_from_this();
     http::async_read(_socket, _buffer, _request, [self](beast::error_code ec, std::size_t bytes_transferred) {
         try
@@ -190,7 +191,7 @@ void HttpConnection::HandleReq()
         }
         _response.result(http::status::ok);
         _response.set(http::field::server, "GateServer");
-        WriteResponse();
+		WriteResponse();//写回响应
         return;
     }
 }

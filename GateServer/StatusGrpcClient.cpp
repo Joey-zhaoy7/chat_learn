@@ -4,10 +4,11 @@
 StatusConPool::StatusConPool(size_t poolsize, std::string host, std::string port):
 	poolSize_(poolsize), host_(host), port_(port), b_stop_(false)
 {
+	//创建多个连接放入队列
 	for (size_t i = 0; i < poolSize_; i++) {
 		std::shared_ptr<Channel> channel = grpc::CreateChannel(host + ":" + port,
 			grpc::InsecureChannelCredentials());
-		connections_.push(StatusService::NewStub(channel));
+		connections_.push(StatusService::NewStub(channel));//创建stub对象
 	}
 }
 
@@ -62,7 +63,10 @@ GetChatServerRsp StatusGrpcClient::GetChatServer(int uid)
 	GetChatServerReq request;
 	request.set_uid(uid);
 	auto stub = pool_->getConnection();
-	//
+	//调用远程方法 参数：上下文，请求，响应
+	//参数固定吗？ 调用不同的方法参数会变化吗？
+	//::grpc::Status StatusService::Stub::GetChatServer(::grpc::ClientContext* context, const ::message::GetChatServerReq& request, ::message::GetChatServerRsp* response)
+	//Status GetChatServer(ServerContext* context, const GetChatServerReq* request,GetChatServerRsp* reply) override
 	Status status = stub->GetChatServer(&context, request, &reply);
 	Defer defer([&stub, this]() {
 		pool_->returnConnection(std::move(stub));

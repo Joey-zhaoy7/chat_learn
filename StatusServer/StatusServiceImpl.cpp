@@ -16,17 +16,19 @@ std::string generate_unique_string() {
 
 Status StatusServiceImpl::GetChatServer(ServerContext* context, const GetChatServerReq* request, GetChatServerRsp* reply)
 {
-	std::string prefix("llfc status server has received :  ");
+	std::string prefix("status server has received :  ");
 	const auto& server = getChatServer();
+	//GetChatServerRsp四个字段赋值
 	reply->set_host(server.host);
 	reply->set_port(std::stoi(server.port));
 	reply->set_error(ErrorCodes::Success);
-	reply->set_token(generate_unique_string());
+	reply->set_token(generate_unique_string());//生成唯一token	额外的拷贝一份token存储到redis中
 	auto token_copy = std::string(reply->token());
 	insertToken(request->uid(), token_copy);
 	return Status::OK;
 }
 
+// 构造函数，初始化聊天服务器列表存储在_servers成员变量中
 StatusServiceImpl::StatusServiceImpl()
 {
 	auto& cfg = ConfigMgr::Inst();
@@ -57,6 +59,8 @@ StatusServiceImpl::StatusServiceImpl()
 
 ChatServer StatusServiceImpl::getChatServer() {
 	std::lock_guard<std::mutex> guard(_server_mtx);
+	// 默认选择第一个服务器 
+	// unordered_map.begin() 返回指向第一个元素的迭代器 ->second 获取该元素的值
 	auto minServer = _servers.begin()->second;
 	
 	//auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, minServer.name);
