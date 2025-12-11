@@ -31,6 +31,8 @@ private:
 signals:
     void sig_con_success(bool bsuccess);
     void sig_send_data(ReqId reqId, QString data);//发送信号给chat server
+    void sig_login_failed(int err);
+    void sig_switch_chatdlg();
 public slots:
     //处理登录界面发送的tcp连接信号
     void slot_tcp_connect(ServerInfo si);

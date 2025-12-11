@@ -1,5 +1,5 @@
 #include "tcpmgr.h"
-
+#include "usermgr.h"
 
 
 TcpMgr::~TcpMgr()
@@ -44,7 +44,7 @@ TcpMgr::TcpMgr():
             QByteArray messageBody = _buffer.mid(0,_message_len);
             qDebug() <<"receive body msg is" <<messageBody;
             _buffer = _buffer.mid(_message_len);
-
+            handleMsg(ReqId(_message_id),_message_len, messageBody);
         }
     });
 
@@ -58,8 +58,54 @@ TcpMgr::TcpMgr():
     });
     //写
     connect(this,&TcpMgr::sig_send_data,this,&TcpMgr::slot_send_data);
+    initHandlers();
 
 }
+
+void TcpMgr::initHandlers()
+{
+    _handlers.insert(ID_CHAT_LOGIN_RSP,[this](ReqId id, int len, QByteArray data){
+        Q_UNUSED(len);
+        qDebug() << "handle id is   "<< id <<"data is "<<data;
+        //将QByteArray转换为QJsonDocument
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(data);
+
+        //检查是否转换成功
+        if(jsonDoc.isNull()){
+            qDebug() << "Failed to create QJsonDocument.";
+            return;
+        }
+
+        QJsonObject jsonObj = jsonDoc.object();
+        if(!jsonObj.contains("error")){
+            int err = ErrorCodes::ERR_JSON;
+            qDebug() << "Login Failed, err is json parse err" << err;
+        }
+        int err = jsonObj["error"].toInt();
+        if(err != ErrorCodes::SUCCESS){
+            qDebug() << "Login Failed, error is "<< err;
+            emit sig_login_failed(err);
+            return;
+        }
+        UserMgr::GetInstance()->SetName(jsonObj["name"].toString());
+        UserMgr::GetInstance()->SetToken(jsonObj["token"].toString());
+        UserMgr::GetInstance()->SetUid(jsonObj["uid"].toInt());
+        emit sig_switch_chatdlg();
+    });
+
+}
+
+void TcpMgr::handleMsg(ReqId id, int len, QByteArray data)
+{
+    auto find_iter = _handlers.find(id);
+    if(find_iter == _handlers.end()){
+        qDebug() << "not found id ["<< id<<"] to handle";
+    }
+    find_iter.value()(id,len,data);
+}
+
+
+
 
 void TcpMgr::slot_tcp_connect(ServerInfo si)
 {
@@ -69,6 +115,7 @@ void TcpMgr::slot_tcp_connect(ServerInfo si)
     _host = si.Host;
     _port=static_cast<uint16_t>(si.Port.toUInt());
     //异步非阻塞。连接完成会发送connected, disconnected,errorOccurred,stateChanged信号
+    qDebug() << "host: "<<_host <<" port: "<< _port;
     _socket.connectToHost(_host, _port);
 }
 

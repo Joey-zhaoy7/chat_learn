@@ -24,7 +24,8 @@ LoginDialog::LoginDialog(QWidget *parent)
     connect(this, &LoginDialog::sig_connect_tcp,TcpMgr::GetInstance().get(),&TcpMgr::slot_tcp_connect);
     //连接客户端连接成功的信号
     connect(TcpMgr::GetInstance().get(),&TcpMgr::sig_con_success,this,&LoginDialog::slot_tcp_con_finish);
-
+    //连接TCP管理者发出登录失败的信号
+    connect(TcpMgr::GetInstance().get(),&TcpMgr::sig_login_failed, this, &LoginDialog::slot_login_failed);
 }
 
 LoginDialog::~LoginDialog()
@@ -145,7 +146,7 @@ void LoginDialog::initHttpHandlers()
         ServerInfo si;
         si.Uid = jsonObj["uid"].toInt();
         si.Host = jsonObj["host"].toString();
-        si.Port = jsonObj["port"].toString();
+        si.Port = QJsonValue(jsonObj["port"]).toVariant().toString();
         si.Token = jsonObj["token"].toString();
 
         _uid = si.Uid;
@@ -220,10 +221,19 @@ void LoginDialog::slot_tcp_con_finish(bool bsuccess)
         QString jsonString = doc.toJson(QJsonDocument::Indented);
 
         //通过tcpmgr发送数据 tcpmgr将json数据写入socket
-        TcpMgr::GetInstance()->sig_send_data(ReqId::ID_CHAT_LOGIN, jsonString);
+        emit TcpMgr::GetInstance()->sig_send_data(ReqId::ID_CHAT_LOGIN, jsonString);
     }else{
         showTip(tr("网络错误"),true);
         enableBtn(true);
     }
 }
+
+void LoginDialog::slot_login_failed(int err)
+{
+    QString result = QString("登录失败，err is &1").arg(err);
+    showTip(result,false);
+    enableBtn(true);
+}
+
+
 

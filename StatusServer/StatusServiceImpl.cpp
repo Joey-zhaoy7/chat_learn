@@ -62,6 +62,12 @@ ChatServer StatusServiceImpl::getChatServer() {
 	// 默认选择第一个服务器 
 	// unordered_map.begin() 返回指向第一个元素的迭代器 ->second 获取该元素的值
 	auto minServer = _servers.begin()->second;
+	for (const auto& server : _servers) {
+		if (server.second.con_count < minServer.con_count) {
+			minServer = server.second;
+		}
+	}
+	return minServer;
 	
 	//auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, minServer.name);
 	//if (count_str.empty()) {
@@ -93,7 +99,7 @@ ChatServer StatusServiceImpl::getChatServer() {
 	//	}
 	//}
 
-	return minServer;
+	//return minServer;
 }
 
 Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request, LoginRsp* reply)
@@ -105,7 +111,7 @@ Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request,
 	std::string token_key = USERTOKENPREFIX + uid_str;
 	std::string token_value = "";
 	bool success = RedisMgr::GetInstance()->Get(token_key, token_value);
-	if (success) {
+	if (!success) {
 		reply->set_error(ErrorCodes::UidInvalid);
 		return Status::OK;
 	}

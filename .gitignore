@@ -11,6 +11,12 @@ StatusServer/x64/
 StatusServer/.vs/
 StatusServer/*.dll
 
+# ±àÒëÄ¿Â¼3
+ChatServer/ChatServer/
+ChatServer/x64/
+ChatServer/.vs/
+ChatServer/*.dll
+
 # Node.js ÒÀÀµ
 VerifyServer/node_modules/
 
