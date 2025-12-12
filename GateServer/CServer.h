@@ -10,6 +10,4 @@ private:
     net::io_context& _ioc;
     //boost::asio::ip::tcp::socket _socket;
 
-
-
 };

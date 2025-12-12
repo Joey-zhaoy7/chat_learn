@@ -220,7 +220,7 @@ void LoginDialog::slot_tcp_con_finish(bool bsuccess)
         QJsonDocument doc(jsonObj);
         QString jsonString = doc.toJson(QJsonDocument::Indented);
 
-        //通过tcpmgr发送数据 tcpmgr将json数据写入socket
+        //通过tcpmgr发送数据 tcpmgr将json数据写入socket reqid:1005
         emit TcpMgr::GetInstance()->sig_send_data(ReqId::ID_CHAT_LOGIN, jsonString);
     }else{
         showTip(tr("网络错误"),true);
