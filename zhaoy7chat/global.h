@@ -17,6 +17,13 @@
 extern std::function<void(QWidget*)> repolish;
 extern std::function<QString(QString)> xorString;
 
+//定义聊天界面的模式
+enum ChatUIMode{
+    SearchMode,
+    ChatMode,
+    ContactMode,
+};
+
 //定义透传
 enum ReqId{
     ID_GET_VERIFY_CODE = 1001,//获取验证码
@@ -52,6 +59,15 @@ enum TipErr{
 enum ClickLbState{
     Normal = 0,
     Selected = 1
+};
+
+enum ListItemType{
+    CHAT_USER_ITEM,
+    CONTACT_USER_ITEM,
+    SEARCH_USER_ITEM,
+    ADD_USER_TIP_ITEM,
+    INVALID_ITEM,//不可点击条目
+    GROUP_TIP_ITEM,//分组提示条目
 };
 
 extern QString gate_url_prefix;
