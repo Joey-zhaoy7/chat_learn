@@ -65,8 +65,8 @@ RegisterDialog::RegisterDialog(QWidget *parent)
     ui->pass_visible->setCursor(Qt::PointingHandCursor);
     ui->confirm_visible->setCursor(Qt::PointingHandCursor);
 
-    ui->pass_visible->SetState("unvisible", "unvisible_hover", "", "visible", "visible_hover", "");
-    ui->confirm_visible->SetState("unvisible", "unvisible_hover", "", "visible", "visible_hover", "");
+    ui->pass_visible->SetState("unvisible", "unvisible_hover", "visible_hover", "visible", "visible_hover", "unvisible_hover");
+    ui->confirm_visible->SetState("unvisible", "unvisible_hover", "visible_hover", "visible", "visible_hover", "unvisible_hover");
 
     //create timer for login ui
     countdown_timer_ = new QTimer(this);

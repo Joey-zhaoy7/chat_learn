@@ -3,6 +3,9 @@
 #include <QAction>
 #include <QRandomGenerator>
 #include "chatuserwid.h"
+#include "loadingdlg.h"
+#include <QMovie>
+#include<QTimer>
 
 ChatDialog::ChatDialog(QWidget *parent)
     : QDialog(parent)
@@ -39,6 +42,7 @@ ChatDialog::ChatDialog(QWidget *parent)
     });
 
     ShowSearch(false);
+    connect(ui->chat_user_list, &ChatUserList::sig_loading_chat_user, this, &ChatDialog::slot_loading_chat_user);
     addChatUserList();
 }
 
@@ -110,4 +114,48 @@ void ChatDialog::ShowSearch(bool bsearch)
         ui->con_user_list->show();
         _mode = ChatUIMode::ContactMode;
     }
+}
+
+// void ChatDialog::slot_loading_chat_user()
+// {
+//     if(_b_loading){
+//         return;
+//     }
+//     _b_loading = true;
+//     LoadingDlg* loadingDialog = new LoadingDlg(this);
+//     loadingDialog->setModal(true);
+//     loadingDialog->show();
+//     qDebug() << "add new data to list...";
+//     addChatUserList();
+//     loadingDialog->deleteLater();
+//     _b_loading = false;
+// }
+
+void ChatDialog::slot_loading_chat_user()
+{
+    if(_b_loading){
+        return;
+    }
+    _b_loading = true;
+
+    QLabel* loading_item = new QLabel(this);
+    QMovie* movie = new QMovie(":/res/loading.gif");
+    loading_item->setMovie(movie);
+    loading_item->setFixedSize(250,70);
+    loading_item->setAlignment(Qt::AlignCenter);
+    movie->setScaledSize(QSize(50,50));
+
+    QListWidgetItem* item= new QListWidgetItem;
+    item->setSizeHint(QSize(250,70));
+    ui->chat_user_list->addItem(item);
+    ui->chat_user_list->setItemWidget(item, loading_item);
+    movie->start();
+
+    QTimer::singleShot(1000,this, [this,item](){
+        qDebug() << "add new Data to list";
+        addChatUserList();
+        ui->chat_user_list->takeItem(ui->chat_user_list->row(item));
+        ui->chat_user_list->update();
+        _b_loading = false;
+    });
 }
