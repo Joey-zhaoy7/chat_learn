@@ -1,13 +1,12 @@
 #ifndef TCPMGR_H
 #define TCPMGR_H
-#include "global.h"
 #include <QTcpSocket>
 #include<functional>
 #include<QObject>
-#include "singleton.h"
 #include <QAbstractSocket>
-
-
+#include "userdata.h"
+#include "global.h"
+#include "singleton.h"
 //聊天服务需要TCP长连接，方便服务器和客户端双向通信，那么就需要一个TCPMgr来管理TCP连接
 class TcpMgr : public QObject, public Singleton<TcpMgr>, std::enable_shared_from_this<TcpMgr>
 {
@@ -33,6 +32,8 @@ signals:
     void sig_send_data(ReqId reqId, QString data);//发送信号给chat server
     void sig_login_failed(int err);
     void sig_switch_chatdlg();
+    //搜索用户
+    void sig_user_search(std::shared_ptr<SearchInfo> si);
 public slots:
     //处理登录界面发送的tcp连接信号
     void slot_tcp_connect(ServerInfo si);

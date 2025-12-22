@@ -2,6 +2,7 @@
 #include "ui_chatdialog.h"
 #include <QAction>
 #include <QRandomGenerator>
+#include <QMouseEvent>
 #include "chatuserwid.h"
 #include "loadingdlg.h"
 #include <QMovie>
@@ -41,9 +42,39 @@ ChatDialog::ChatDialog(QWidget *parent)
         ShowSearch(false);
     });
 
+    ui->search_edit->SetMaxLength(15);
+
     ShowSearch(false);
     connect(ui->chat_user_list, &ChatUserList::sig_loading_chat_user, this, &ChatDialog::slot_loading_chat_user);
     addChatUserList();
+
+    //加载图标 ":/res/head_1.jpg"
+    QPixmap pixmap(":/res/head_1.jpg");
+    ui->side_head_lb->setPixmap(pixmap);
+    QPixmap scaledPixmap = pixmap.scaled( ui->side_head_lb->size(), Qt::KeepAspectRatio);
+    ui->side_head_lb->setPixmap(scaledPixmap);
+    ui->side_head_lb->setScaledContents(true);//自动缩放内容
+
+    //头像下面两个图标 初始化状态
+    ui->side_chat_lb->setProperty("state","normal");
+    ui->side_chat_lb->SetState("normal","hover","pressed","selected_normal","selected_hover","selected_pressed");
+    ui->side_contact_lb->SetState("normal","hover","pressed","selected_normal","selected_hover","selected_pressed");
+
+    //加入队列中
+    AddLBGroup(ui->side_chat_lb);
+    AddLBGroup(ui->side_contact_lb);
+    //连接设置点击按钮再释放的信号
+    connect(ui->side_chat_lb, &StateWidget::clicked, this, &ChatDialog::slot_side_chat);
+    connect(ui->side_contact_lb, &StateWidget::clicked, this, &ChatDialog::slot_side_contact);
+
+    //连接搜索输入框输入变化
+    connect(ui->search_edit, &QLineEdit::textChanged, this, &ChatDialog::slot_text_changed);
+
+    //检测鼠标点击位置判断是否清空搜索框
+    this->installEventFilter(this); //write eventFilter
+
+    //默认进入界面选中聊天label
+    ui->side_chat_lb->SetSelected(true);
 }
 
 ChatDialog::~ChatDialog()
@@ -96,6 +127,43 @@ void ChatDialog::addChatUserList()
     }
 }
 
+void ChatDialog::ClearLabelState(StateWidget *lb)
+{
+    for(auto& ele:_lb_list){
+        if(ele == lb){
+            continue;
+        }
+        ele->ClearState();
+    }
+}
+
+bool ChatDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress){
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        handleGlobalMousePress(mouseEvent);
+    }
+    return QDialog::eventFilter(watched, event);
+}
+
+void ChatDialog::handleGlobalMousePress(QMouseEvent *event)
+{
+    // 实现点击位置的判断和处理逻辑
+    // 先判断是否处于搜索模式，如果不处于搜索模式则直接返回
+    if( _mode != ChatUIMode::SearchMode){
+        return;
+    }
+
+    // 将鼠标点击位置转换为搜索列表坐标系中的位置
+    QPoint posInSearchList = ui->search_list->mapFromGlobal(event->globalPos());
+    // 判断点击位置是否在聊天列表的范围内
+    if (!ui->search_list->rect().contains(posInSearchList)) {
+        // 如果不在聊天列表内，清空输入框
+        ui->search_edit->clear();
+        ShowSearch(false);
+    }
+}
+
 void ChatDialog::ShowSearch(bool bsearch)
 {
     if(bsearch){
@@ -114,6 +182,11 @@ void ChatDialog::ShowSearch(bool bsearch)
         ui->con_user_list->show();
         _mode = ChatUIMode::ContactMode;
     }
+}
+
+void ChatDialog::AddLBGroup(StateWidget *lb)
+{
+    _lb_list.push_back(lb);
 }
 
 // void ChatDialog::slot_loading_chat_user()
@@ -158,4 +231,29 @@ void ChatDialog::slot_loading_chat_user()
         ui->chat_user_list->update();
         _b_loading = false;
     });
+}
+
+void ChatDialog::slot_side_chat()
+{
+    qDebug() << "receive side chat clicked";
+    ClearLabelState(ui->side_chat_lb);
+    ui->stackedWidget->setCurrentWidget(ui->chat_page);
+    _state = ChatUIMode::ChatMode;
+    ShowSearch(false);
+}
+
+void ChatDialog::slot_side_contact()
+{
+    qDebug()<<"receive side contact clicked";
+    ClearLabelState(ui->side_contact_lb);
+    ui->stackedWidget->setCurrentWidget(ui->friden_apply_page);
+    _state = ChatUIMode::ContactMode;
+    ShowSearch(false);
+}
+
+void ChatDialog::slot_text_changed(const QString &str)
+{
+    if(!str.isEmpty()){
+        ShowSearch(true);
+    }
 }
