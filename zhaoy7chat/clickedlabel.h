@@ -16,6 +16,8 @@ public:
     void SetState(QString normal="", QString hover="", QString press="",
                   QString select="", QString select_hover="", QString select_press="");
     ClickLbState GetCurState();
+    bool SetCurState(ClickLbState state);
+    void ResetNormalState();
 private:
     //定义六种状态
     // 初始化"unvisible", "unvisible_hover", "", "visible", "visible_hover", ""
@@ -32,7 +34,7 @@ private:
     // Selected = 1
     ClickLbState _curstate;
 signals:
-    void clicked(void);
+    void clicked(QString, ClickLbState);
 
 };
 

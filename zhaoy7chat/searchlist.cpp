@@ -111,7 +111,7 @@ void SearchList::slot_item_clicked(QListWidgetItem *item)
     if(itemType == ListItemType::ADD_USER_TIP_ITEM){
         //todo ...
         _find_dlg = std::make_shared<FindSuccessDlg>(this);
-        auto si = std::make_shared<SearchInfo>(0,"joey","nick","hello world",1);
+        auto si = std::make_shared<SearchInfo>(0,"joey","nick","hello world",1,"test");
         std::dynamic_pointer_cast<FindSuccessDlg>(_find_dlg)->setSearchInfo(si);
 
         qDebug() << "slot ADD_USER_TIP_ITEM ";

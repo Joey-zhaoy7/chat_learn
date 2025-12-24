@@ -34,6 +34,12 @@ signals:
     void sig_switch_chatdlg();
     //搜索用户
     void sig_user_search(std::shared_ptr<SearchInfo> si);
+    //同意添加好友，服务器的回包
+    void sig_auth_rsp(std::shared_ptr<AuthRsp>);
+    //收到对方好友申请
+    void sig_friend_apply(std::shared_ptr<AddFriendApply>);
+    //我收到对方同意的认证 对方同意了发送这个信号
+    void sig_add_auth_friend(std::shared_ptr<AuthInfo>);
 public slots:
     //处理登录界面发送的tcp连接信号
     void slot_tcp_connect(ServerInfo si);

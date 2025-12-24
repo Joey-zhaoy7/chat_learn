@@ -17,6 +17,12 @@ ChatServer/x64/
 ChatServer/.vs/
 ChatServer/*.dll
 
+# ±àÒëÄ¿Â¼4
+ChatServer2/ChatServer/
+ChatServer2/x64/
+ChatServer2/.vs/
+ChatServer2/*.dll
+
 # Node.js ÒÀÀµ
 VerifyServer/node_modules/
 

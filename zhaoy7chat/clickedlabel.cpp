@@ -116,7 +116,7 @@ void ClickedLabel::mouseReleaseEvent(QMouseEvent *event)
             repolish(this);
             update();
 
-            emit clicked(); // 发送点击信号
+            emit clicked(this->text(),_curstate); // 发送点击信号
         } else {
             // 鼠标在控件外释放，显示普通样式
             if(_curstate == ClickLbState::Normal){
@@ -154,4 +154,26 @@ void ClickedLabel::SetState(QString normal, QString hover, QString press, QStrin
 
 ClickLbState ClickedLabel::GetCurState(){
     return _curstate;
+}
+
+bool ClickedLabel::SetCurState(ClickLbState state)
+{
+    _curstate = state;
+    if (_curstate == ClickLbState::Normal) {
+        setProperty("state", _normal);
+        repolish(this);
+    }
+    else if (_curstate == ClickLbState::Selected) {
+        setProperty("state", _selected);
+        repolish(this);
+    }
+
+    return true;
+}
+
+void ClickedLabel::ResetNormalState()
+{
+    _curstate = ClickLbState::Normal;
+    setProperty("state", _normal);
+    repolish(this);
 }
