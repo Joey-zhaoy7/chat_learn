@@ -3,6 +3,7 @@
 #include "CSession.h"
 #include "ConfigMgr.h"
 #include "RedisMgr.h"
+#include "UserMgr.h"
 CServer::CServer(boost::asio::io_context& io_context, short port):
 	_io_context(io_context),//主函数的服务
 	_port(port),
@@ -18,10 +19,17 @@ CServer::~CServer()
 	std::cout << "Server destruct listen on port: " << _port << std::endl;
 }
 
-void CServer::ClearSession(std::string uuid)
+void CServer::ClearSession(std::string session_id)
 {
-	lock_guard<mutex> lock(_mutex);
-	_sessions.erase(uuid);
+	if (_sessions.find(session_id) != _sessions.end()) {
+		//remove link between uid and session
+		UserMgr::GetInstance()->RmvUserSession(_sessions[session_id]->GetUserId());
+	}
+
+	{
+		lock_guard<mutex> lock(_mutex);
+		_sessions.erase(session_id);
+	}
 }
 
 //bool CServer::CheckValid(std::string uuid)
@@ -99,7 +107,7 @@ void CServer::HandleAccept(std::shared_ptr<CSession>new_session, const boost::sy
 	if (!error) {
 		new_session->Start(); //开始读取
 		lock_guard<mutex> lock(_mutex);
-		_sessions.insert(std::make_pair(new_session->GetUuid(), new_session));
+		_sessions.insert(std::make_pair(new_session->GetSessionId(), new_session));
 	}
 	else
 	{

@@ -17,6 +17,8 @@ message GetVerifyRsp {
 }
 
 //new added service for status server
+
+//获取对端地址
 message GetChatServerReq{
 	int32 uid = 1;
 }
@@ -40,4 +42,79 @@ message LoginRsp{
 service StatusService{
 	rpc GetChatServer (GetChatServerReq) returns (GetChatServerRsp){}
 	rpc Login (LoginReq) returns (LoginRsp){}
+}
+
+//new add service for  peer chat server
+message AddFriendReq {
+	int32  applyuid = 1;
+	string name = 2;
+	string desc = 3;
+	int32  touid = 4;
+}
+
+message AddFriendRsp {
+	int32 error = 1;
+	int32 applyuid = 2;
+	int32 touid = 3;
+}
+
+message RplyFriendReq {
+	int32 rplyuid = 1;
+	bool  agree = 2;
+	int32 touid = 3;
+}
+
+message RplyFriendRsp {
+	int32 error = 1;
+	int32 rplyuid = 2;
+	int32 touid = 3;
+}
+
+message SendChatMsgReq{
+		int32 fromuid = 1;
+		int32 touid = 2;
+		string message = 3;
+}
+
+message SendChatMsgRsp{
+		int32 error = 1;
+		int32 fromuid = 2;
+		int32 touid = 3;
+}
+
+message AuthFriendReq{
+	int32 fromuid = 1;
+	int32 touid = 2;
+}
+
+message AuthFriendRsp{
+	int32 error = 1;
+	int32 fromuid = 2;
+	int32 touid = 3;
+}
+
+message TextChatMsgReq {
+	int32 fromuid = 1;
+    int32 touid = 2;
+	repeated TextChatData textmsgs = 3;
+}
+
+message TextChatData{
+	string msgid = 1; //标识已读 未读
+	string msgcontent = 2;
+}
+
+message TextChatMsgRsp {
+	int32 error = 1;
+	int32 fromuid = 2;
+	int32 touid = 3; 
+	repeated TextChatData textmsgs = 4;
+}
+
+service ChatService {
+	rpc NotifyAddFriend(AddFriendReq) returns (AddFriendRsp) {}
+	rpc RplyAddFriend(RplyFriendReq) returns (RplyFriendRsp) {}
+	rpc SendChatMsg(SendChatMsgReq) returns (SendChatMsgRsp) {}
+	rpc NotifyAuthFriend(AuthFriendReq) returns (AuthFriendRsp) {}
+	rpc NotifyTextChatMsg(TextChatMsgReq) returns (TextChatMsgRsp){}//认证完之后通知
 }

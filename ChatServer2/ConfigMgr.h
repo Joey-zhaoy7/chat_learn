@@ -36,7 +36,7 @@ struct SectionInfo
 	
 };
 
-class ConfigMgr
+class ConfigMgr 
 {
 public:
 	~ConfigMgr();
@@ -53,6 +53,7 @@ public:
 		}
 		_config_map = src._config_map;
 	}
+	
 
 	std::string GetValue(const std::string& section, const std::string& key);
 

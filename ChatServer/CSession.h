@@ -34,9 +34,10 @@ public:
 	CSession(boost::asio::io_context& io_context, CServer* server);
 	~CSession();
 	tcp::socket& GetSocket();
-	std::string& GetUuid();
-	//void SetUserId(int uid);
-	//int GetUserId();
+	//std::string& GetUuid();
+	std::string& GetSessionId();
+	void SetUserId(int uid);
+	int GetUserId();
 	void Start();
 	void Send(char* msg, short max_length, short msgid);
 	void Send(std::string msg, short msgid);
@@ -64,8 +65,8 @@ private:
 	void HandleWrite(const boost::system::error_code& error, std::shared_ptr<CSession> shared_self);
 	//网络相关
 	tcp::socket _socket;
-	std::string _uuid;
-	//std::string _session_id;//会话唯一标识UUID
+	//std::string _uuid;
+	std::string _session_id;//会话唯一标识UUID
 	char _data[MAX_LENGTH];//接受缓冲区
 
 	CServer* _server;
@@ -81,7 +82,7 @@ private:
 	//收到的头部结构
 	std::shared_ptr<MsgNode> _recv_head_node;
 
-	//int _user_uid;
+	int _user_uid;
 	//记录上次接受数据的时间
 	//std::atomic<time_t> _last_heartbeat;
 	//session 锁

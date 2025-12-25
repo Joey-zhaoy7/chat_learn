@@ -54,6 +54,7 @@ private:
 	//为什么连接池是使用queue? 因为连接池是先进先出
 	std::unordered_map<std::string, ChatServer> _servers;
 	std::mutex _server_mtx;
+	//std::mutex _token_mtx;
 
 };
 
