@@ -29,7 +29,7 @@ private:
     quint16 _message_len;
 signals:
     void sig_con_success(bool bsuccess);
-    void sig_send_data(ReqId reqId, QString data);//发送信号给chat server
+    void sig_send_data(ReqId reqId, QByteArray data);//发送信号给chat server
     void sig_login_failed(int err);
     void sig_switch_chatdlg();
     //搜索用户
@@ -40,11 +40,13 @@ signals:
     void sig_friend_apply(std::shared_ptr<AddFriendApply>);
     //我收到对方同意的认证 对方同意了发送这个信号
     void sig_add_auth_friend(std::shared_ptr<AuthInfo>);
+
+    void sig_text_chat_msg(std::shared_ptr<TextChatMsg> msg);
 public slots:
     //处理登录界面发送的tcp连接信号
     void slot_tcp_connect(ServerInfo si);
     //进行数据发送
-    void slot_send_data(ReqId reqId, QString data);
+    void slot_send_data(ReqId reqId, QByteArray data);
 };
 
 #endif // TCPMGR_H

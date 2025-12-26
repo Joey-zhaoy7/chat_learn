@@ -26,6 +26,10 @@ LoginDialog::LoginDialog(QWidget *parent)
     connect(TcpMgr::GetInstance().get(),&TcpMgr::sig_con_success,this,&LoginDialog::slot_tcp_con_finish);
     //连接TCP管理者发出登录失败的信号
     connect(TcpMgr::GetInstance().get(),&TcpMgr::sig_login_failed, this, &LoginDialog::slot_login_failed);
+
+    //测试
+    ui->email_edit->setText(QString("987963453@qq.com"));
+    ui->pass_edit->setText(QString("123456"));
 }
 
 LoginDialog::~LoginDialog()
@@ -218,7 +222,8 @@ void LoginDialog::slot_tcp_con_finish(bool bsuccess)
         jsonObj["token"] = _token;
 
         QJsonDocument doc(jsonObj);
-        QString jsonString = doc.toJson(QJsonDocument::Indented);
+        // QString jsonString = doc.toJson(QJsonDocument::Indented);
+        QByteArray jsonString = doc.toJson(QJsonDocument::Indented);
 
         //通过tcpmgr发送数据 tcpmgr将json数据写入socket reqid:1005
         emit TcpMgr::GetInstance()->sig_send_data(ReqId::ID_CHAT_LOGIN, jsonString);

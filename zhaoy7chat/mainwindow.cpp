@@ -104,6 +104,7 @@ void MainWindow::SlotSwitchReset()
 void MainWindow::SlotSwitchChat()
 {
     _chat_dlg = new ChatDialog();
+
     _chat_dlg->setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
     setCentralWidget(_chat_dlg);
     _chat_dlg->show();

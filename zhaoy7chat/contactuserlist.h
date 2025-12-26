@@ -19,22 +19,23 @@ private:
 public slots:
     //处理点击item
     void slot_item_clicked(QListWidgetItem* item);
-    // //处理添加好友成功 tcp回传
-    // void slot_add_auth_friend(std::shared_ptr<AuthInfo>);
-    // //处理同意添加好友 更新列表
-    // void slot_auth_rsp(std::shared_ptr<AuthRsp>);
+    // //对方同意我的添加好友请求，处理添加好友成功
+    void slot_add_auth_friend(std::shared_ptr<AuthInfo>);
+    //处理自己同意对方的添加好友请求 更新列表
+    void slot_auth_rsp(std::shared_ptr<AuthRsp>);
 signals:
     //加载联系人
     void sig_loading_contact_user();
     //切换好友界面
     void sig_switch_apply_friend_page();
     //切换申请好友界面
-    void sig_switch_friend_info_page();
+    void sig_switch_friend_info_page(std::shared_ptr<UserInfo> user_info);
 private:
     //每一个item
     ConUserItem* _add_friend_item;
     //分组
     QListWidgetItem* _groupitem;
+    bool _load_pending;
 };
 
 #endif // CONTACTUSERLIST_H
